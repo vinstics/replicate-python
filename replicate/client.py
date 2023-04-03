@@ -23,7 +23,6 @@ class Client:
         self.poll_interval = float(os.environ.get("REPLICATE_POLL_INTERVAL", "0.5"))
 
         max_retries: int = 5
-        self.httpx_transport = httpx.AsyncHTTPTransport(retries=max_retries)
 
         # TODO: make thread safe
         self.session = requests.Session()
@@ -71,9 +70,10 @@ class Client:
         kwargs.setdefault("headers", {})
         kwargs["headers"].update(self._headers())
 
+        transport = httpx.AsyncHTTPTransport(retries=5)
         async with httpx.AsyncClient(
             follow_redirects=True,
-            transport=self.httpx_transport,
+            transport=transport,
         ) as client:
             if "allow_redirects" in kwargs:
                 kwargs.pop("allow_redirects")
